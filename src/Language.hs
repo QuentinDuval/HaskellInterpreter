@@ -58,7 +58,7 @@ eval LambdaExpr{..} env cont = cont (ProcVal var body env)
 eval CondExpr{..}   env cont =
   eval cond env $ \(BoolVal b) ->
     eval (if b then consequence else fallback) env cont
-eval LetExpr{..} env cont =
+eval LetExpr{..} env cont = -- TODO: could be made a combination of lambda + call (IIFE)
   eval binding env $ \val ->
     eval body (assocEnv env var val) cont
 eval CallExpr{..} env cont =
