@@ -14,7 +14,7 @@ data ExpressedValue
   = IntVal  { intVal :: Int }
   | BoolVal { boolVal :: Bool }
   | ProcVal { var :: Variable, body :: Expression, savedEnv :: Environment }
-  | ListVal { values :: [ExpressedValue] }
+  | ListVal { values :: [ExpressedValue] } -- TODO: useless without list expression
   | PrimPlus
   | PrimZero
   deriving (Show, Eq, Ord)
@@ -89,6 +89,8 @@ testLanguage = do
                         cond = (CallExpr (CstExpr PrimZero) (VarExpr "x")),
                         consequence = (VarExpr "x"),
                         fallback = (VarExpr "y")
+                        -- TODO: make it work with several arguments
+                        -- fallback = (CallExpr (CstExpr PrimPlus) [(VarExpr "x") (VarExpr "y")])
                       }
               } }
   print $ run prog
