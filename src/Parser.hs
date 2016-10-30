@@ -106,8 +106,8 @@ skipSpace = do
 
 testParser :: IO ()
 testParser = do
-  let p = (,) <$> parseChar <*> parseChar
-  print $ runParser p "Hello"
+  let p = (,) <$> (skipSpace *> parseChar) <*> parseChar
+  print $ runParser p " Hello"
 
 
 --
