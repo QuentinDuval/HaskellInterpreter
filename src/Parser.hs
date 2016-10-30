@@ -101,13 +101,17 @@ skipSpace = do
   when (c /= ' ') $
     raiseError "No space found"
 
+skipSpaces :: (IStream s) => Parser s ()
+skipSpaces = many (skipSpace) *> pure ()
+
 
 -- TEST DRIVER
 
 testParser :: IO ()
 testParser = do
-  let p = (,) <$> (skipSpace *> parseChar) <*> parseChar
-  print $ runParser p " Hello"
+  let p = (,) <$> (skipSpaces *> parseChar) <*> parseChar
+  print $ runParser p "Hello"
+  print $ runParser p "  Hello"
 
 
 --
