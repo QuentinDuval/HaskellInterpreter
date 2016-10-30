@@ -1,6 +1,6 @@
 module Parser where
 
-import Control.Arrow(second)
+import Control.Arrow(first, second)
 
 
 --
@@ -21,7 +21,7 @@ instance IStream String where
 
 
 --
--- Parser implementation
+-- Parser result
 --
 
 data ParseResult a
@@ -29,13 +29,36 @@ data ParseResult a
   | Error { errorMsg :: String }
   deriving (Show, Eq, Ord, Functor)
 
+instance Applicative ParseResult where
+  pure a = Success a
+  (Success f) <*> (Success a) = Success (f a)
+  (Error msg) <*> _ = (Error msg)
+  _ <*> (Error msg) = (Error msg)
+
+instance Monad ParseResult where
+  (Error msg) >>= _ = (Error msg)
+  (Success v) >>= f = f v
+
+
+--
+-- Parser implementation
+--
+
 newtype Parser stream a
-  = Parser { runParser :: stream -> ParseResult (stream, a) }
+  = Parser { runParser :: stream -> ParseResult (a, stream) }
 
 instance (IStream stream) => Functor (Parser stream) where
   fmap :: (a -> b) -> Parser stream a -> Parser stream b
-  fmap f (Parser p) = Parser $ \s -> fmap (second f) (p s)
+  fmap f (Parser p) = Parser $ \s -> fmap (first f) (p s)
 
--- instance (IStream stream) => Applicative (Pa)
+instance (IStream stream) => Applicative (Parser stream) where
+  pure :: a -> Parser stream a
+  pure a = Parser $ \s -> Success (a, s)
+  (<*>) :: Parser stream (a -> b) -> Parser stream a -> Parser stream b
+  (Parser pf) <*> (Parser pa) =
+    Parser $ \s1 -> do
+      (f, s2) <- pf s1
+      (a, s3) <- pa s2
+      pure (f a, s3)
 
 --
