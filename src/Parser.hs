@@ -1,6 +1,7 @@
 module Parser where
 
 import Control.Arrow(first, second)
+import Control.Applicative
 
 
 --
@@ -35,6 +36,11 @@ instance Applicative ParseResult where
   (Error msg) <*> _ = (Error msg)
   _ <*> (Error msg) = (Error msg)
 
+instance Alternative ParseResult where
+  empty = Error "Empty result"
+  s@(Success a) <|> _ = s
+  _ <|> result = result
+
 instance Monad ParseResult where
   (Error msg) >>= _ = (Error msg)
   (Success v) >>= f = f v
@@ -60,6 +66,12 @@ instance (IStream stream) => Applicative (Parser stream) where
       (f, s2) <- pf s1
       (a, s3) <- pa s2
       pure (f a, s3)
+
+instance (IStream stream) => Alternative (Parser stream) where
+  empty :: Parser stream a
+  empty = Parser $ \_ -> empty
+  (<|>) :: Parser stream a -> Parser stream a -> Parser stream a
+  (Parser p1) <|> (Parser p2) = Parser $ \s -> (p1 s) <|> (p2 s)
 
 instance (IStream stream) => Monad (Parser stream) where
   (>>=) :: (Parser stream a) -> (a -> Parser stream b) -> Parser stream b
