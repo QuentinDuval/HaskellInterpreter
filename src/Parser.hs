@@ -53,11 +53,11 @@ instance Monad ParseResult where
 newtype Parser stream a
   = Parser { runParser :: stream -> ParseResult (a, stream) }
 
-instance (IStream stream) => Functor (Parser stream) where
+instance Functor (Parser stream) where
   fmap :: (a -> b) -> Parser stream a -> Parser stream b
   fmap f (Parser p) = Parser $ \s -> fmap (first f) (p s)
 
-instance (IStream stream) => Applicative (Parser stream) where
+instance Applicative (Parser stream) where
   pure :: a -> Parser stream a
   pure a = Parser $ \s -> Success (a, s)
   (<*>) :: Parser stream (a -> b) -> Parser stream a -> Parser stream b
@@ -67,13 +67,13 @@ instance (IStream stream) => Applicative (Parser stream) where
       (a, s3) <- pa s2
       pure (f a, s3)
 
-instance (IStream stream) => Alternative (Parser stream) where
+instance Alternative (Parser stream) where
   empty :: Parser stream a
   empty = Parser $ \_ -> empty
   (<|>) :: Parser stream a -> Parser stream a -> Parser stream a
   (Parser p1) <|> (Parser p2) = Parser $ \s -> (p1 s) <|> (p2 s)
 
-instance (IStream stream) => Monad (Parser stream) where
+instance Monad (Parser stream) where
   (>>=) :: (Parser stream a) -> (a -> Parser stream b) -> Parser stream b
   (Parser pa) >>= f =
     Parser $ \s1 -> do
