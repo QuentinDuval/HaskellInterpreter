@@ -61,4 +61,11 @@ instance (IStream stream) => Applicative (Parser stream) where
       (a, s3) <- pa s2
       pure (f a, s3)
 
+instance (IStream stream) => Monad (Parser stream) where
+  (>>=) :: (Parser stream a) -> (a -> Parser stream b) -> Parser stream b
+  (Parser pa) >>= f =
+    Parser $ \s1 -> do
+      (a, s2) <- pa s1
+      runParser (f a) s2
+
 --
